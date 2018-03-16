@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euo pipefail
+
+[[ -n ${1:-} ]] || ( echo Usage: $0 HOST && exit 1)
+
+# https://serverfault.com/a/299563/401207
+echo $1 | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\)\(..\).*$/02:\1:\2:\3:\4:\5/'
