@@ -86,6 +86,4 @@ auto ens3
 iface ens3 inet dhcp
 EOF
 
-# TODO find out how files/debian9.xml and ens3 relate
-
 exit  # sudo -i

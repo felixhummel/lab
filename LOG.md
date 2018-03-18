@@ -58,3 +58,13 @@ Mounted Kernel. Pro: lvresize for raw FS. Con: cannot update kernel *inside* FS.
 
 # ACPI for `virsh shutdown`
 `acpi-support`
+
+# ens3
+`/etc/network/interfaces` defines `ens3`, because `files/debian9.xml` sets the network interface on `slot='0x03'`.
+
+This is the PCI slot `3`. If you set it to `0x01`, virsh complains:
+```
+Attempted double use of PCI slot 0000:00:01.0 (may need "multifunction='on'" for device on function 0)
+```
+
+To get `ens1`, `ens2` and `ens3`, use higher slot numbers for different controllers.
