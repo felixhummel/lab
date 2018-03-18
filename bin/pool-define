@@ -1,0 +1,11 @@
+#!/bin/bash
+set -euo pipefail
+
+vg=$1
+pool=$2
+
+[[ -e /dev/$vg/ ]]
+
+virsh pool-define-as $pool logical --source-name $vg --target /dev/$vg
+virsh pool-start $pool
+virsh pool-autostart $pool

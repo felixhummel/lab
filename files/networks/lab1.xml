@@ -5,13 +5,13 @@
       <port start='1024' end='65535'/>
     </nat>
   </forward>
-  <bridge name='virbr0' stp='on' delay='0'/>
-  <mac address='TODO'/>
+  <!-- name attr https://libvirt.org/formatnetwork.html#elementsConnect -->
+  <bridge stp='on' delay='0'/>
   <domain name='lab1' localOnly='yes'/>
-  <ip address='10.12.1.0' netmask='255.255.255.0'>
+  <ip address='10.12.1.1' netmask='255.255.255.0'>
     <dhcp>
-      <range start='10.12.1.128' end='10.12.2.254'/>
-      <host mac='TODO' name='node1' ip='10.12.1.1'/>
+      <range start='10.12.1.128' end='10.12.1.254'/>
+      <!-- <host mac='TODO' name='node1' ip='10.12.1.1'/> -->
     </dhcp>
   </ip>
 </network>

@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+
+# our pool is based on an existing VG
+# needs work-around. https://unix.stackexchange.com/a/156411/120440
+rm -f /etc/libvirt/storage/lab.xml
+rm -f /etc/libvirt/storage/autostart/lab.xml
+service libvirt-bin restart

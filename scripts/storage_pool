@@ -1,0 +1,91 @@
+# vim: set ft=sh :
+
+sudo -i
+
+pvs
+vgs
+# ssd (VFree 200GB)
+
+vg=ssd
+pool=lab
+
+./bin/pool-define $vg $pool
+
+virsh pool-list
+virsh pool-info $pool
+virsh vol-list --pool $pool
+
+vol=debian9
+virsh vol-create-as --pool $pool --format raw --capacity 20G --name $vol
+
+dev=/dev/$vg/$vol
+echo $dev
+mkfs.ext4 $dev
+
+# Install Debian
+# ==============
+target=/tmp/target
+mkdir $target
+
+mount $dev $target
+df $target
+
+release=stretch
+mirror=http://ftp.de.debian.org/debian/
+arch=amd64
+
+debootstrap --arch $arch $release $target
+
+# Kernel time!
+target_mount() {
+  mount -t proc proc ${target}/proc  # for bash completion
+  mount --bind /dev ${target}/dev
+  mount -t sysfs sysfs ${target}/sys
+}
+target_umount() {
+  umount ${target}/proc
+  umount ${target}/dev
+  umount ${target}/sys
+}
+
+target_mount
+chroot $target apt-get install --yes --no-install-recommends linux-image-amd64
+cp $target/boot/vmlinuz-4.9.0-6-amd64 /var/lib/libvirt/kernels/debian9/
+cp $target/boot/initrd.img-4.9.0-6-amd64 /var/lib/libvirt/kernels/debian9/
+chown -R libvirt-qemu: /var/lib/libvirt/kernels/
+target_umount
+
+# test-run
+# ========
+
+# set root pw
+chroot $target
+passwd
+exit
+
+# virsh network
+virsh net-define files/networks/lab1.xml
+virsh net-autostart lab1
+virsh net-start lab1
+
+UUID=$(blkid -o export $dev | grep ^UUID | cut -d= -f2)
+cat <<EOF > $target/etc/fstab
+UUID=$UUID /               ext4    errors=remount-ro 0       1
+EOF
+
+echo debian9 > $target/etc/hostname
+cat <<'EOF' > $target/etc/network/interfaces
+# interfaces(5) file used by ifup(8) and ifdown(8)
+# Include files from /etc/network/interfaces.d:
+source-directory /etc/network/interfaces.d
+
+auto lo
+iface lo inet loopback
+
+auto ens3
+iface ens3 inet dhcp
+EOF
+
+# TODO find out how files/debian9.xml and ens3 relate
+
+exit  # sudo -i
