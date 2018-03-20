@@ -1,69 +1,95 @@
 # vim: set ft=sh :
 
-sudo -i
+# set thi
+pubkey=$(readlink -m ~/.ssh/id_rsa.pub)
 
-pvs
-vgs
-# ssd (VFree 200GB)
+pubkey=$pubkey sudo -H $SHELL
+
+# check prerequisites
+hash virsh
+hash debootstrap
+hash chroot
+
+[[ -f $pubkey ]]
 
 vg=ssd
 pool=lab
 
-./bin/pool-define $vg $pool
+name=debian9
+vol=$name
+dev=/dev/$vg/$vol
+target=/tmp/target
 
-virsh pool-list
+# cleanup DANGER! DESTRUCTIVE! :>
+virsh undefine debian9
+
 virsh pool-info $pool
 virsh vol-list --pool $pool
+virsh vol-delete --pool $pool $vol
 
-vol=debian9
+# again
 virsh vol-create-as --pool $pool --format raw --capacity 20G --name $vol
 
-dev=/dev/$vg/$vol
 echo $dev
 mkfs.ext4 $dev
 
+# caching \o/
+wajig install apt-cacher-ng
+netstat -pant | grep 3142
+tail -f /var/log/apt-cacher-ng/apt-cacher.*
+
 # Install Debian
 # ==============
-target=/tmp/target
+echo $target
 mkdir $target
 
 mount $dev $target
 df $target
 
 release=stretch
-mirror=http://ftp.de.debian.org/debian/
+# note: different arch? cross compile: a different story.
 arch=amd64
+kernel_package=linux-image-amd64
+# comma-separated
+include=$kernel_package,acpi-support,bash-completion,htop,net-tools,openssh-server,vim-nox
 
-debootstrap --arch $arch $release $target
+http_proxy=http://localhost:3142 debootstrap \
+  --include=$include \
+  --arch $arch \
+  $release \
+  $target
 
 # Kernel time!
-target_mount() {
+extra_mount() {
   mount -t proc proc ${target}/proc  # for bash completion
   mount --bind /dev ${target}/dev
   mount -t sysfs sysfs ${target}/sys
 }
-target_umount() {
+extra_umount() {
   umount ${target}/proc
   umount ${target}/dev
   umount ${target}/sys
 }
 
-target_mount
-chroot $target apt-get install --yes --no-install-recommends linux-image-amd64
-cp $target/boot/vmlinuz-4.9.0-6-amd64 /var/lib/libvirt/kernels/debian9/
-cp $target/boot/initrd.img-4.9.0-6-amd64 /var/lib/libvirt/kernels/debian9/
-chown -R libvirt-qemu: /var/lib/libvirt/kernels/
-target_umount
+extra_mount
+KERNELS_BASE_DIR=/var/lib/libvirt/kernels
+kernels=$KERNELS_BASE_DIR/$name
+mkdir -p $kernels
+cp $target/boot/vmlinuz* $kernels/
+kernel_name=$(basename $target/boot/vmlinuz*)
+kernel_host_path=$kernels/$kernel_name
+cp $target/boot/initrd.img* $kernels/
+initrd_name=$(basename $target/boot/initrd.img*)
+initrd_host_path=$kernels/$initrd_name
+chown -R libvirt-qemu: $kernels/
+DEBIAN_FRONTEND=noninteractive chroot $target apt-get purge --yes $kernel_package
+extra_umount
 
-# test-run
-# ========
-
-# set root pw
-chroot $target
-passwd
-exit
+# prep test-run
+# =============
 
 # virsh network
+virsh net-list --all
 virsh net-define files/networks/lab1.xml
 virsh net-autostart lab1
 virsh net-start lab1
@@ -73,7 +99,7 @@ cat <<EOF > $target/etc/fstab
 UUID=$UUID /               ext4    errors=remount-ro 0       1
 EOF
 
-echo debian9 > $target/etc/hostname
+echo $name > $target/etc/hostname
 cat <<'EOF' > $target/etc/network/interfaces
 # interfaces(5) file used by ifup(8) and ifdown(8)
 # Include files from /etc/network/interfaces.d:
@@ -86,4 +112,37 @@ auto ens3
 iface ens3 inet dhcp
 EOF
 
+mv $target/etc/ssh/sshd_config $target/etc/ssh/sshd_config.orig
+cat <<'EOF' > $target/etc/ssh/sshd_config
+ChallengeResponseAuthentication no
+UsePAM yes
+X11Forwarding yes
+PrintMotd no
+AcceptEnv LANG LC_*
+Subsystem sftp  /usr/lib/openssh/sftp-server
+PermitRootLogin without-password
+EOF
+(umask 077 && mkdir -p $target/root/.ssh && touch $target/root/.ssh/authorized_keys)
+cat $pubkey >> $target/root/.ssh/authorized_keys
+
+umount $target
+
+echo XML snippet:
+cat <<EOF
+    <kernel>$kernel_host_path</kernel>
+    <initrd>$initrd_host_path</initrd>
+    <cmdline>root=UUID=$UUID ro console=ttyS0</cmdline>
+EOF
+
 exit  # sudo -i
+
+
+# configure and create machine
+vi files/debian9.xml  # xml snippet for domain > os
+virsh define files/debian9.xml
+virsh start debian9
+
+# ssh \o/
+virsh net-dhcp-leases lab1
+ip=$(dig @10.12.1.1 +short $name)
+ssh root@$ip

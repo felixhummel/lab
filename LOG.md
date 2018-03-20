@@ -68,3 +68,11 @@ Attempted double use of PCI slot 0000:00:01.0 (may need "multifunction='on'" for
 ```
 
 To get `ens1`, `ens2` and `ens3`, use higher slot numbers for different controllers.
+
+# And again
+With caching and SSH! \o/
+
+FS fail?
+```
+e2fsck $dev
+```

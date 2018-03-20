@@ -7,7 +7,7 @@
     <type arch='x86_64' machine='pc'>hvm</type>
     <kernel>/var/lib/libvirt/kernels/debian9/vmlinuz-4.9.0-6-amd64</kernel>
     <initrd>/var/lib/libvirt/kernels/debian9/initrd.img-4.9.0-6-amd64</initrd>
-    <cmdline>root=UUID=158245b1-b085-41a0-85b3-beb045b9ec4e ro console=ttyS0</cmdline>
+    <cmdline>root=UUID=69c723d6-77a0-4038-b8a8-31140c83dd1b ro console=ttyS0</cmdline>
     <boot dev='hd'/>
   </os>
   <features>
