@@ -47,11 +47,11 @@ On LVM. the logical volume contents should be the raw FS (no partition tables).
 
 Mounted Kernel. Pro: lvresize for raw FS. Con: cannot update kernel *inside* FS.
 
-- [x] storage pool, volume, FS [scripts/storage_pool](scripts/storage_pool)
+- [x] storage pool, volume, FS [scripts/base_image](scripts/base_image)
 - [x] install. either:
   - [ ] iso, volume, FS, installer, kernel extract
   - [x] or [debootstrap](https://blag.felixhummel.de/admin/chroot.html)
-- [x] kernel extract [scripts/storage_pool](scripts/storage_pool)
+- [x] kernel extract [scripts/base_image](scripts/base_image)
 - [x] run and verify
 
 `--include=less,locales-all,vim,sudo,openssh-server` looks nice http://diogogomes.com/2012/07/13/debootstrap-kvm-image/index.html
