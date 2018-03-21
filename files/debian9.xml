@@ -77,13 +77,5 @@
     <memballoon model='virtio'>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
     </memballoon>
-    <!--
-    shutdown agent
-    https://wiki.libvirt.org/page/Qemu_guest_agent#Setting_QEMU_GA_up
-    -->
-    <channel type='unix'>
-       <source mode='bind' path='/var/lib/libvirt/qemu/f16x86_64.agent'/>
-       <target type='virtio' name='org.qemu.guest_agent.0'/>
-    </channel>
   </devices>
 </domain>
