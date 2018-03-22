@@ -76,3 +76,22 @@ FS fail?
 ```
 e2fsck $dev
 ```
+
+# Multi-Net and DNS \o/
+Given two nets `lab1` (`10.12.1.0/24`) and `lab2` (`10.12.2.0/24`),
+can a vm in `lab1` talk to a vm in `lab2`?
+
+https://wiki.libvirt.org/page/VirtualNetworking
+
+https://www.redhat.com/archives/libvir-list/2013-December/msg00063.html
+
+I guess setting `//network/forward/nat/port` explicitly is not needed.
+Docs are quiet: https://libvirt.org/formatnetwork.html#elementsConnect
+
+Wrong name in `virsh vol-create`? [./bin/lvm-vol-rename](bin/lvm-vol-rename), `service libvirt-bin restart`
+
+Let's have a look at
+[drill](https://imdjh.github.io/toolchain/2015/10/07/drill-if-you-can-dig-if-you-have-to.html)
+some time...
+
+

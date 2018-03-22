@@ -51,7 +51,7 @@ release=stretch
 arch=amd64
 kernel_package=linux-image-amd64
 # comma-separated
-include=$kernel_package,acpi-support,bash-completion,htop,net-tools,openssh-server,vim-nox
+include=$kernel_package,acpi-support,bash-completion,htop,net-tools,openssh-server,vim-nox,dnsutils
 
 http_proxy=http://localhost:3142 debootstrap \
   --include=$include \

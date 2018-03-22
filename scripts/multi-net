@@ -1,0 +1,64 @@
+#!/bin/bash
+virsh net-define files/networks/lab2.xml
+virsh net-autostart lab2
+virsh net-start lab2
+
+virsh vol-clone --pool lab debian9 node1.lab1
+virsh vol-clone --pool lab debian9 node1.lab2
+
+cp files/debian9.xml files/node1.lab1.xml
+cp files/debian9.xml files/node1.lab2.xml
+vi files/node1.lab1.xml
+vi files/node1.lab2.xml
+
+# /domain/name
+# /domain/devices/disk/source
+# /domain/devices/interfaces/source[@network]
+
+sudo -H $SHELL #---------------------------------------------------------------
+wajig install libxml-xpath-perl
+
+nodename=node1.lab1
+nodehostname=$(echo $nodename | cut -d'.' -f1)
+d=$(./bin/nodemount $nodename)
+
+[[ $d != / ]]
+echo $d
+echo $nodehostname > $d/etc/hostname
+
+cat <<EOF > $d/etc/hosts
+127.0.0.1	localhost
+127.0.1.1 $nodehostname
+EOF
+
+nodename=node1.lab2
+nodehostname=$(echo $nodename | cut -d'.' -f1)
+d=$(./bin/nodemount $nodename)
+
+[[ $d != / ]]
+echo $d
+echo $nodehostname > $d/etc/hostname
+
+cat <<EOF > $d/etc/hosts
+127.0.0.1	localhost
+127.0.1.1 $nodehostname
+EOF
+
+exit # ------------------------------------------------------------------------
+
+virsh start node1.lab1
+virsh start node1.lab2
+
+
+# DNS! \o/
+cat <<'EOF' > /etc/NetworkManager/dnsmasq.d/libvirt-dns.conf
+server=/lab1/10.12.1.1
+server=/lab2/10.12.2.1
+EOF
+
+journalctl -f  # in another terminal
+service network-manager force-reload
+
+# SSH
+ssh root@node1.lab1 'echo "Hello from $HOSTNAME! My IP address: $(hostname -I)"'
+ssh root@node1.lab2 'echo "Hello from $HOSTNAME! My IP address: $(hostname -I)"'
