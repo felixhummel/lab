@@ -11,3 +11,6 @@ Real alternatives:
 
 - https://www.linux-kvm.org/page/Management_Tools
 - https://www.proxmox.com/en/proxmox-ve
+
+# Getting Started
+Check out [LOG.md](LOG.md)

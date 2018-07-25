@@ -1,0 +1,35 @@
+#!/bin/bash
+set -euo pipefail
+
+set -x
+source .env
+
+base=$1
+net=$2
+name=$3
+set +x
+
+# need libxml-xpath-perl later on
+hash xmllint
+# base must exist
+virsh vol-list --pool $pool | awk '{ print $1 }' | grep -q "^$base$"
+# base XML file must exist
+ls files/$base.xml >/dev/null
+# net must exist
+virsh net-list | awk '{ print $1 }' | grep -q "^$net$"
+# name must not be defined as a volume
+virsh vol-list --pool $pool | awk '{ print $1 }' | grep -vq "^$name$"
+# name must not be defined as a node
+virsh list --all | awk '{ print $2 }' | grep -vq "^$name$"
+# name must not be a hostname in net (DHCP lease)
+virsh net-dhcp-leases --network lab1 | awk '{ print $6 }' | grep -vq "^$name$"
+echo checks OK >&2
+
+sudo true  # get password out of the way
+
+dev=$(virsh pool-dumpxml --pool $pool | ./bin/xpath-attr-content '/pool/target/path')
+set -x
+virt-clone --original debian9 --name $name --file $dev/$name
+# TODO: set network
+# TODO: fix naming, i.e. `/dev/ssd/node2.lab2`, vm name `node2.lab2`
+set +x

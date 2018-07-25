@@ -94,4 +94,29 @@ Let's have a look at
 [drill](https://imdjh.github.io/toolchain/2015/10/07/drill-if-you-can-dig-if-you-have-to.html)
 some time...
 
+# New-Node Script
+https://www.ovirt.org/ looks interesting
 
+TL;DR
+RTFM!
+
+- hackey hack
+- abort script while cloning --> `vol-delete` --> `volume 'node3' is still being allocated.`
+- how long does this take? is there a progress bar?
+- https://www.google.com/search?q=virsh+vol-clone+"progress"
+- https://bugzilla.redhat.com/show_bug.cgi?id=829166
+- https://linux.die.net/man/1/virt-clone
+
+```
+cat <<EOF > .env
+pool=lab
+EOF
+
+./bin/new-node debian9 lab1 node2
+virsh start node2
+ssh root@node2.lab1
+```
+
+works for lab1 (because debian9) is defined there. see TODOs in [./bin/new-node](./bin/new-node)
+
+`bin/base2xml.py` and `bin/xmlformat.py` are drafts for xml manipulation
