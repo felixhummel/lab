@@ -120,3 +120,18 @@ ssh root@node2.lab1
 works for lab1 (because debian9) is defined there. see TODOs in [./bin/new-node](./bin/new-node)
 
 `bin/base2xml.py` and `bin/xmlformat.py` are drafts for xml manipulation
+
+[setting static IP addresses](README.md#setting-static-ip-addresses)
+
+kill everything
+```
+for node in $(virsh list  --all --name|grep ^node); do
+  virsh undefine $node
+done
+for vol in $(virsh vol-list --pool lab | awk '/\s+node/ {print $1 }'); do
+  virsh vol-delete --pool lab --vol $vol
+done
+virsh net-destroy lab1
+virsh net-undefine lab1
+```
+

@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+# encoding: utf-8
+"""
+Usage:
+
+virsh define --file <(virsh dumpxml --domain node2 | ./bin/xml-set-network lab2)
+"""
+import sys
+from lxml import etree
+
+network = sys.argv[1]
+
+root = etree.parse(sys.stdin)
+xs = root.xpath('//interface/source')
+if len(xs) > 1:
+    sys.stderr.write('more than one hit')
+    raise SystemExit(1)
+
+xs[0].set('network', network)
+print(etree.tostring(root, encoding='unicode'))
+

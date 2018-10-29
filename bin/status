@@ -1,0 +1,18 @@
+#!/bin/bash
+set -euo pipefail
+
+source .env
+
+header() {
+  echo "$1"
+  python -c "print('=' * len('$1'))"
+}
+
+header networks
+virsh net-list --all
+
+header domains
+virsh list --all
+
+header volumes
+virsh vol-list --pool $pool

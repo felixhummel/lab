@@ -16,7 +16,6 @@ vi files/node1.lab2.xml
 # /domain/devices/interfaces/source[@network]
 
 sudo -H $SHELL #---------------------------------------------------------------
-wajig install libxml-xpath-perl
 
 nodename=node1.lab1
 nodehostname=$(echo $nodename | cut -d'.' -f1)
@@ -62,3 +61,13 @@ service network-manager force-reload
 # SSH
 ssh root@node1.lab1 'echo "Hello from $HOSTNAME! My IP address: $(hostname -I)"'
 ssh root@node1.lab2 'echo "Hello from $HOSTNAME! My IP address: $(hostname -I)"'
+
+
+# cleanup
+./bin/status
+virsh net-undefine lab1
+virsh net-undefine lab2
+virsh undefine --domain node1.lab1 --managed-save --nvram
+virsh undefine --domain node1.lab2 --managed-save --nvram
+virsh vol-delete --pool lab --vol node1.lab1
+virsh vol-delete --pool lab --vol node1.lab2

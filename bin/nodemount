@@ -7,7 +7,7 @@ target=$(mktemp -d)
 die() { echo "$@" 2>&1; exit 1; }
 
 [[ $USER == 'root' ]] || die must be root
-dev=$(virsh dumpxml --domain $node | ./bin/xpath-attr-content /domain/devices/disk/source/@dev)
+dev=$(virsh dumpxml --domain $node | ./bin/xpath /domain/devices/disk/source/@dev)
 [[ -e $dev ]] || die invalid device $dev
 
 mount $dev $target

@@ -6,11 +6,12 @@ source .env
 
 base=$1
 net=$2
-name=$3
+hostname=$3
+name=$hostname.$net
 set +x
 
-# need libxml-xpath-perl later on
-hash xmllint
+# lxml must be installed
+python -c 'from lxml import etree'
 # base must exist
 virsh vol-list --pool $pool | awk '{ print $1 }' | grep -q "^$base$"
 # base XML file must exist
@@ -21,15 +22,17 @@ virsh net-list | awk '{ print $1 }' | grep -q "^$net$"
 virsh vol-list --pool $pool | awk '{ print $1 }' | grep -vq "^$name$"
 # name must not be defined as a node
 virsh list --all | awk '{ print $2 }' | grep -vq "^$name$"
-# name must not be a hostname in net (DHCP lease)
-virsh net-dhcp-leases --network lab1 | awk '{ print $6 }' | grep -vq "^$name$"
+# hostname must not be in net (DHCP lease)
+virsh net-dhcp-leases --network lab1 | awk '{ print $6 }' | grep -vq "^$hostname$"
 echo checks OK >&2
 
 sudo true  # get password out of the way
 
-dev=$(virsh pool-dumpxml --pool $pool | ./bin/xpath-attr-content '/pool/target/path')
+dev=$(virsh pool-dumpxml --pool $pool | ./bin/xpath '/pool/target/path/text()')
 set -x
-virt-clone --original debian9 --name $name --file $dev/$name
-# TODO: set network
-# TODO: fix naming, i.e. `/dev/ssd/node2.lab2`, vm name `node2.lab2`
+virt-clone --original $base --name $name --file $dev/$name
+# set target network
+virsh define <(virsh dumpxml --domain $name | ./bin/domain-set-network $net)
+# set hostname
+sudo ./bin/set-hostname $net $hostname
 set +x

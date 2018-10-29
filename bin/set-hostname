@@ -1,20 +1,22 @@
 #!/bin/bash
 set -euo pipefail
 
-name=$1
+net=$1
+hostname=$2
+name=$hostname.$net
 
 die() { echo "$@" 2>&1; exit 1; }
 
 [[ $USER == 'root' ]] || die must be root
 d=$(./bin/nodemount $name)
 
-[[ $d != / ]]
+[[ $d =~ ^/tmp ]]
 echo $d
-echo $name > $d/etc/hostname
+echo $hostname > $d/etc/hostname
 
 cat <<EOF > $d/etc/hosts
 127.0.0.1	localhost
-127.0.1.1 $name
+127.0.1.1 $hostname $hostname.$net
 EOF
 
 umount $d

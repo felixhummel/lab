@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+# encoding: utf-8
+import sys
+from lxml import etree
+
+xpath = sys.argv[1]
+
+root = etree.parse(sys.stdin)
+xs = root.xpath(xpath)
+for x in xs:
+    if isinstance(x, str):
+        print(x)
+    else:
+        print(etree.tostring(x, encoding='unicode').strip())
+
+if len(xs) > 1:
+    sys.stderr.write('more than one hit')
+    raise SystemExit(1)
+

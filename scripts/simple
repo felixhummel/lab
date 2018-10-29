@@ -1,0 +1,9 @@
+#!/bin/bash
+
+virsh net-define files/networks/lab1.xml
+virsh net-autostart lab1
+virsh net-start lab1
+
+virsh vol-clone --pool lab debian9 node1.lab1
+virsh vol-clone --pool lab debian9 node2.lab1
+virsh vol-clone --pool lab debian9 node3.lab1

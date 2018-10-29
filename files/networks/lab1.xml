@@ -10,8 +10,8 @@
   <domain name='lab1' localOnly='yes'/>
   <ip address='10.12.1.1' netmask='255.255.255.0'>
     <dhcp>
-      <range start='10.12.1.128' end='10.12.1.254'/>
-      <!-- <host mac='TODO' name='node1' ip='10.12.1.1'/> -->
+      <!-- .1 is reserved for DNS -->
+      <range start='10.12.1.2' end='10.12.1.254'/>
     </dhcp>
   </ip>
 </network>
