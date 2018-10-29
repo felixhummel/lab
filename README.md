@@ -78,7 +78,11 @@ Nodes are friends. They won't imitate each other. If on says it is "node1"
 # Setting static IP addresses
 ```
 virsh net-dhcp-leases --network lab1
-virsh net-update lab1 add ip-dhcp-host "<host name='node1' ip='10.12.1.55' />" --live --config
+
+# note that .1 is reserved for DNS
+virsh net-update lab1 add ip-dhcp-host "<host name='node1' ip='10.12.1.11' />" --live --config
+virsh net-update lab1 add ip-dhcp-host "<host name='node2' ip='10.12.1.12' />" --live --config
+virsh net-update lab1 add ip-dhcp-host "<host name='node3' ip='10.12.1.13' />" --live --config
 virsh reboot --domain node1.lab1
 watch -n1 virsh net-dhcp-leases --network lab1
 

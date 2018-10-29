@@ -1,3 +1,6 @@
+- move DNS to .254 to make room for:
+  - node1 --> 10.12.1.1
+  - node2 --> 10.12.1.2
 - sane MAC addressing scheme for static IPs in networks, because networks are
   harder to change than VMs
 - regenerate host SSH keys after clone
