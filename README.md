@@ -1,3 +1,25 @@
+# Dependencies
+```
+$ virsh version 
+Compiled against library: libvirt 4.0.0
+Using library: libvirt 4.0.0
+Using API: QEMU 4.0.0
+Running hypervisor: QEMU 2.11.1
+
+$ python -V
+Python 3.6.3
+$ python -c 'import lxml' || pip install lxml==4.2.5
+
+$ bash --version
+GNU bash, version 4.4.19(1)-release (x86_64-pc-linux-gnu)
+Copyright (C) 2016 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+
+This is free software; you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+```
+
+
 # Getting Started
 Create a network
 ```
