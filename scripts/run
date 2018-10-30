@@ -1,0 +1,4 @@
+#!/bin/bash
+set -euo pipefail
+
+parallel ssh root@{} "$@" ::: node1.lab1 node2.lab1 node3.lab1
